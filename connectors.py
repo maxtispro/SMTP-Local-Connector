@@ -17,7 +17,6 @@ class Connector:
 
     def sendmail(self):
         ssl_context = ssl.create_default_context()
-        print(self.from_addr, self.to_addrs, self.message)
         
         with Client(config.remote.hostname, config.remote.port, timeout=30) as client:
             client.ehlo()
