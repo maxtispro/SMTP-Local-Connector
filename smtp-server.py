@@ -1,4 +1,6 @@
-from aiosmtpd.smtp import SMTP as Server, Envelope, Session
+import secrets
+
+from aiosmtpd.smtp import SMTP as Server, Envelope, Session, AuthResult, LoginPassword
 from aiosmtpd.controller import Controller
 import smtplib
 import asyncio
@@ -11,6 +13,27 @@ from config import config
 def relay_message(envelope: Envelope):
     connector = Connector(envelope)
     return connector.sendmail()
+
+
+def authenticate(
+    server: Server,
+    session: Session,
+    envelope: Envelope,
+    mechanism: str,
+    auth_data: LoginPassword
+) -> AuthResult:
+    
+    if mechanism not in {"LOGIN", "PLAIN"}:
+        return AuthResult(success=False, handled=False)
+
+    username_valid = secrets.compare_digest(auth_data.login, config.local.user.encode())
+
+    password_valid = secrets.compare_digest(auth_data.password, config.local.password.encode())
+
+    if username_valid and password_valid:
+        return AuthResult(success=True)
+
+    return AuthResult(success=False, handled=False, message="535 5.7.8 Authentication credentials invalid")
 
 
 class MessageHandler:
@@ -43,7 +66,10 @@ if __name__ == "__main__":
     controller = Controller(
         MessageHandler(),
         config.local.hostname,
-        config.local.port
+        config.local.port,
+        authenticator=authenticate,
+        auth_require_tls=False,
+        decode_data=False
     )
 
     try:

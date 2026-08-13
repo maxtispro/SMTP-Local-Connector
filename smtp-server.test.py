@@ -6,11 +6,20 @@ from config import config
 
 if __name__ == "__main__":
 
-    message = EmailMessage()
-    message["From"] = f"Test <{config.remote.from_email}>"
-    message["To"] = config.test.to_email
-    message["Subject"] = "SMTP Local Connector Success"
-    message.set_content("You have successfully configured SMTP Local Connector xD")
+    with Client(config.local.hostname, config.local.port) as client:
+        client.set_debuglevel(1)
+        client.ehlo()
 
-    client = Client(config.local.hostname, config.local.port)
-    client.send_message(message, "user@example.com", [config.test.to_email])
+        print("Advertised features:", client.esmtp_features)
+
+        client.login(config.local.user, config.local.password)
+
+        print("Authentication succeeded")
+
+        message = EmailMessage()
+        message["From"] = f"Test <{config.remote.from_email}>"
+        message["To"] = config.test.to_email
+        message["Subject"] = "SMTP Local Connector Success"
+        message.set_content("You have successfully configured SMTP Local Connector xD")
+
+        client.send_message(message, "user@example.com", [config.test.to_email])

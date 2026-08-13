@@ -11,6 +11,8 @@ class Local:
     domain: str
     hostname: str
     port: int
+    user: str
+    password: str
 
 @dataclass
 class Remote:
