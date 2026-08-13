@@ -1,0 +1,13 @@
+local:
+    domain: local
+    hostname: 127.0.0.1
+    port: 6002
+remote:
+    domain: example.com
+    hostname: smtp.example.com
+    port: 587
+    from_email: user@example.com
+    user: user
+    secret: secret123
+test:
+    to_email: test_user@mail.example.com
